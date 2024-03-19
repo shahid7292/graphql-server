@@ -73,7 +73,7 @@ const RootQueryType = new GraphQLObjectType({
       args: {
         id: { type: GraphQLInt },
       },
-      resolve: (parent, args) => books.find((book) => book.id === args.id),
+      resolve: (_parent, args) => books.find((book) => book.id === args.id),
     },
     authors: {
       type: new GraphQLList(AuthorType),
@@ -86,7 +86,7 @@ const RootQueryType = new GraphQLObjectType({
       args: {
         id: { type: GraphQLInt },
       },
-      resolve: (parent, args) =>
+      resolve: (_parent, args) =>
         authors.find((author) => author.id === args.id),
     },
   }),
@@ -103,7 +103,7 @@ const RootMutationType = new GraphQLObjectType({
         name: { type: GraphQLNonNull(GraphQLString) },
         authorId: { type: GraphQLNonNull(GraphQLInt) },
       },
-      resolve: (parent, args) => {
+      resolve: (_parent, args) => {
         const book = {
           id: books.length + 1,
           name: args.name,
@@ -111,6 +111,41 @@ const RootMutationType = new GraphQLObjectType({
         };
         books.push(book);
         return book;
+      },
+    },
+    updateBook: {
+      type: BookType,
+      description: "Add a book",
+      args: {
+        id: { type: GraphQLNonNull(GraphQLInt) },
+        name: { type: GraphQLNonNull(GraphQLString) },
+        authorId: { type: GraphQLNonNull(GraphQLInt) },
+      },
+      resolve: (_parent, args) => {
+        const book = {
+          id: args.id,
+          name: args.name,
+          authorId: args.authorId,
+        };
+        const index = books.findIndex((book) => book.id === args.id);
+        if (index !== -1) {
+          books[index] = book;
+        }
+        return book;
+      },
+    },
+    deleteBook: {
+      type: GraphQLInt,
+      description: "Add a book",
+      args: {
+        id: { type: GraphQLNonNull(GraphQLInt) },
+      },
+      resolve: (_parent, args) => {
+        const index = books.findIndex((book) => book.id === args.id);
+        if (index !== -1) {
+          books.splice(index, 1);
+          return index;
+        }
       },
     },
     addAuthor: {
